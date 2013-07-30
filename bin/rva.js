@@ -19,7 +19,6 @@ var restify = require('/opt/resty-vmadm/node_modules/restify');
 var cfg_file = '/opt/resty-vmadm/etc/resty-vmadm.json';
 var cfg_data = fs.readFileSync(cfg_file, 'utf8');
 var cfg = JSON.parse(cfg_data);
-console.log(cfg);
 
 var restify_cfg = {
 	name: 'resty-vmadm'
@@ -127,7 +126,6 @@ function delete_vm(req, res, next) {
 
 // create zone
 function new_vm(req, res, next) {
-	console.log(req);
 	VM.create(req.params,
 		function(err, vmobjs) {
 			if (err) {
