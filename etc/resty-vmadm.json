@@ -2,5 +2,6 @@
 	"ssl_cert": "",
 	"ssl_key": "",
 	"port": 8095,
-	"apikey": "BlahBlahBlah"
+	"username": "apiuserblah",
+	"password": "What's the password?"
 }

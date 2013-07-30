@@ -142,6 +142,28 @@ function new_vm(req, res, next) {
 
 // Start server
 var server = restify.createServer(restify_cfg);
+server.use(restify.authorizationParser());
+server.use(restify.jsonp());
+server.use(restify.gzipResponse());
+
+// check if we are using auth
+if ("username" in cfg && "password" in cfg) {
+	console.log("Requiring authentication");
+	
+	server.use(function auth(req, res, next) {
+		console.log(req.authorization);
+		if ("basic" in req.authorization) {
+			if (req.authorization.basic.username == cfg.username && 
+			    req.authorization.basic.password == cfg.password) {
+				return next();
+			} else {
+				return next(new restify.NotAuthorizedError());
+			}
+		} else {
+			return next(new restify.NotAuthorizedError());
+		}
+	});
+}
 
 server.get('/zones', lookup);
 server.get('/zones/:uuid', get);
