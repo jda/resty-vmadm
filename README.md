@@ -50,7 +50,7 @@ This is to help prevent mistakes on your management network, not to secure it so
 
 ## Library Credits
 Restify and its dependencies are bundled in node_modules for ease of deployment. 
-Their license statements can be found in [the credit file](CREDITS.md).
+Their respective license statements can be found in the usual place inside node_modules.
 
 ## License
 > Copyright (c) 2013 Jonathan Auer
