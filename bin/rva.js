@@ -127,8 +127,8 @@ function delete_vm(req, res, next) {
 
 // create zone
 function new_vm(req, res, next) {
-	props = {};	
-	VM.create(props,
+	console.log(req);
+	VM.create(req.params,
 		function(err, vmobjs) {
 			if (err) {
 				res.send(err);
@@ -152,7 +152,6 @@ if ("username" in cfg && "password" in cfg) {
 	console.log("Requiring authentication");
 	
 	server.use(function auth(req, res, next) {
-		console.log(req.authorization);
 		if ("basic" in req.authorization) {
 			if (req.authorization.basic.username == cfg.username && 
 			    req.authorization.basic.password == cfg.password) {
