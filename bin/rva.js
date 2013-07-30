@@ -38,11 +38,6 @@ if ("port" in cfg) {} else {
 	cfg.port = 8080
 }
 
-// Setup stuff to do hoere
-function respond(req, res, next) {
-	res.send('hello ' + req.params.name);
-}
-
 // list of zones (just uuid)
 function lookup(req, res, next) {
 	VM.lookup({}, 
@@ -63,7 +58,16 @@ function info(req, res, next) {
 			if (err) {
 				res.send(err);
 			} else {
-				res.send(vmobjs);
+				if ("subset" in req.params) {
+					if (req.params.subset in vmobjs) {
+						res.send(vmobjs[req.params.subset]);
+					} else {
+						res.status(404);
+						res.send("Subset " + req.params.subset + " not found");	
+					}
+				} else {	
+					res.send(vmobjs);
+				}	
 			}
 		}
 	);
@@ -139,12 +143,10 @@ function new_vm(req, res, next) {
 // Start server
 var server = restify.createServer(restify_cfg);
 
-server.get('/hello/:name', respond);
-server.head('/hello/:name', respond);
-
 server.get('/zones', lookup);
 server.get('/zones/:uuid', get);
 server.get('/zones/:uuid/info', info);
+server.get('/zones/:uuid/info/:subset', info);
 server.put('/zones/:uuid/start', start_vm);
 server.put('/zones/:uuid/stop', stop_vm);
 server.del('/zones/:uuid', delete_vm);
