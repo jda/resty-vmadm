@@ -3,7 +3,7 @@ resty-vmadm
 
 REST API for managing SmartOS VMs
 
-resty-vmadm (rva) is a very thin wrapper around vmadm. 
+resty-vmadm (rva) is a very thin web service wrapper around vmadm.
 
 ## API
 
