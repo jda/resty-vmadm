@@ -37,8 +37,12 @@ Returns a subset of KVM info status.
 E.g. /zones/zone-uuid/info/vnc returns the VNC connection information for a given KVM zone.
 
 ## Installation
+*On a SmartOS global zone*
 
-
+1. Copy the resty-vmadm source directory to /opt/resty-vmadm
+2. ln -s /opt/resty-vmadm/resty-vmadm.xml /opt/custom/smf/resty-vmadm.xml
+3. Edit the config to set port numbers, username, password, etc: /opt/resty-vmadm/etc/resty-vmadm.json
+4. reboot the system to make sure everything comes up cleanly
 
 ## Security note
 resty-vmadm is pretty dangerous and should only be run in a trusted environment. 
