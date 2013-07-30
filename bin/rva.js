@@ -88,7 +88,7 @@ function get(req, res, next) {
 
 // start zone
 function start_vm(req, res, next) {
-	VM.start(req.params.uuid,
+	VM.start(req.params.uuid, {},
 		function(err, vmobjs) {
 			if (err) {
 				res.send(err);
@@ -101,7 +101,7 @@ function start_vm(req, res, next) {
 
 // stop zone
 function stop_vm(req, res, next) {
-	VM.stop(req.params.uuid,
+	VM.stop(req.params.uuid, req.params,
 		function(err, vmobjs) {
 			if (err) {
 				res.send(err);
@@ -145,6 +145,7 @@ var server = restify.createServer(restify_cfg);
 server.use(restify.authorizationParser());
 server.use(restify.jsonp());
 server.use(restify.gzipResponse());
+server.use(restify.bodyParser());
 
 // check if we are using auth
 if ("username" in cfg && "password" in cfg) {
