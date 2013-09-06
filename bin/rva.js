@@ -5,6 +5,7 @@ var async = require('/usr/node/node_modules/async');
 var fs = require('fs');
 var fwLog = require('/usr/fw/lib/util/log');
 var VM = require('/usr/vm/node_modules/VM');
+var zfs = require('/usr/node/node_modules/zfs');
 var nopt = require('/usr/vm/node_modules/nopt');
 var onlyif = require('/usr/node/node_modules/onlyif');
 var panic = require('/usr/node/node_modules/panic');
@@ -137,6 +138,41 @@ function new_vm(req, res, next) {
 	);
 }
 
+// Given a array of fields and a array of arrays of values
+// convert to a array of objects values keyed by name
+function flatten_fields(header, data) {
+	var res = new Array();
+
+	for (var i=0; i<data.length; i++) {
+		var entry = {};
+		for (var j=0; j<header.length; j++) {
+			entry[header[j]] = data[i][j];
+		}
+		res.push(entry);
+	}
+
+	return res;
+}
+
+// List zpools
+function list_zpools(req, res, next) {
+	zfs.zpool.list(function(err, fields, data) {
+		if (err) {
+			res.send(err);
+		} else {
+			res.send(flatten_fields(fields, data));
+		}
+	});	
+}
+
+// Get zpool status
+function get_zpool_status(req, res, next) {
+	zfs.zpool.status(req.params.pool, function(err, st) {
+		res.send(st);		
+	});
+}
+
+
 
 // Start server
 var server = restify.createServer(restify_cfg);
@@ -174,6 +210,8 @@ if ("username" in cfg && "password" in cfg) {
 	});
 }
 
+server.get('/storage', list_zpools);
+server.get('/storage/:pool', get_zpool_status);
 server.get('/zones', lookup);
 server.get('/zones/:uuid', get);
 server.get('/zones/:uuid/info', info);
