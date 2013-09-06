@@ -3,5 +3,6 @@
 	"ssl_key": "",
 	"port": 8095,
 	"username": "apiuserblah",
-	"password": "What's the password?"
+	"password": "What's the password?",
+	"ui": "true"
 }
