@@ -5,6 +5,7 @@ var async = require('/usr/node/node_modules/async');
 var fs = require('fs');
 var fwLog = require('/usr/fw/lib/util/log');
 var VM = require('/usr/vm/node_modules/VM');
+var system = require('/usr/node/node_modules/system');
 var zfs = require('/usr/node/node_modules/zfs');
 var nopt = require('/usr/vm/node_modules/nopt');
 var onlyif = require('/usr/node/node_modules/onlyif');
@@ -172,7 +173,16 @@ function get_zpool_status(req, res, next) {
 	});
 }
 
-
+// Get provisionable memory
+function get_prov_mem(req, res, next) {
+	system.getProvisionableMemory(function(err, mem) {
+		if (err) {
+			res.send(err);
+		} else {
+			res.send(mem + ' MiB');
+		}	
+	});
+}
 
 // Start server
 var server = restify.createServer(restify_cfg);
@@ -210,6 +220,7 @@ if ("username" in cfg && "password" in cfg) {
 	});
 }
 
+server.get('/memory', get_prov_mem);
 server.get('/storage', list_zpools);
 server.get('/storage/:pool', get_zpool_status);
 server.get('/zones', lookup);
