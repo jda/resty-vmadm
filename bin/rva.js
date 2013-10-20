@@ -192,17 +192,6 @@ server.use(restify.jsonp());
 server.use(restify.gzipResponse());
 server.use(restify.bodyParser());
 
-// check if the ui is ineabled
-if ("ui" in cfg) {
-	if (cfg.ui == "true") {
-		console.log("UI Enabled");
-		server.get(/\/doc\/?.*/, restify.serveStatic({
-			directory: '/opt/resty-vmadm',
-			default: 'doc/index.html'
-		}));
-	}
-}
-
 // check if we are using auth
 if ("username" in cfg && "password" in cfg) {
 	console.log("Requiring authentication");
