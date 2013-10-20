@@ -179,7 +179,8 @@ function get_prov_mem(req, res, next) {
 		if (err) {
 			res.send(err);
 		} else {
-			res.send(mem + ' MiB');
+			var memory = {"memory": mem};
+			res.send(memory);
 		}	
 	});
 }
@@ -195,9 +196,9 @@ server.use(restify.bodyParser());
 if ("ui" in cfg) {
 	if (cfg.ui == "true") {
 		console.log("UI Enabled");
-		server.get(/\/ui\/?.*/, restify.serveStatic({
+		server.get(/\/doc\/?.*/, restify.serveStatic({
 			directory: '/opt/resty-vmadm',
-			default: 'ui/index.html'
+			default: 'doc/index.html'
 		}));
 	}
 }
