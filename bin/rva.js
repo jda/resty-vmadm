@@ -44,9 +44,10 @@ function lookup(req, res, next) {
 	VM.lookup({}, 
 		function(err, vmobjs) {
 			if (err) {
-				res.send(err);
+				res.send(mk_error(err));
 			} else {
-				res.send(vmobjs);
+				var zones = {"zones": vmobjs};
+				res.send(zones);
 			}		
 		}
 	);
@@ -92,9 +93,11 @@ function start_vm(req, res, next) {
 	VM.start(req.params.uuid, {},
 		function(err, vmobjs) {
 			if (err) {
-				res.send(err);
+				var msg = {"error": err.message};	
+				res.send(msg);
 			} else {
-				res.send(vmobjs);
+				var msg = {"message": "zone started"};
+				res.send(msg);
 			}
 		}
 	);
@@ -105,9 +108,11 @@ function stop_vm(req, res, next) {
 	VM.stop(req.params.uuid, req.params,
 		function(err, vmobjs) {
 			if (err) {
-				res.send(err);
+				var msg = {"error": err.message};
+				res.send(msg);
 			} else {
-				res.send(vmobjs);
+				var msg = {"message": "zone stopped"};	
+				res.send(msg);
 			}
 		}
 	);
@@ -118,7 +123,7 @@ function delete_vm(req, res, next) {
 	VM.delete(req.params.uuid,
 		function(err, vmobjs) {
 			if (err) {
-				res.send(err);
+				res.send(mk_error(err));
 			} else {
 				res.send(vmobjs);
 			}
@@ -159,9 +164,10 @@ function flatten_fields(header, data) {
 function list_zpools(req, res, next) {
 	zfs.zpool.list(function(err, fields, data) {
 		if (err) {
-			res.send(err);
+			res.send(mk_error(err));
 		} else {
-			res.send(flatten_fields(fields, data));
+			var zones = {"zpools": flatten_fields(fields, data)};	
+			res.send(zones);
 		}
 	});	
 }
@@ -169,7 +175,12 @@ function list_zpools(req, res, next) {
 // Get zpool status
 function get_zpool_status(req, res, next) {
 	zfs.zpool.status(req.params.pool, function(err, st) {
-		res.send(st);		
+		if (err) {
+			res.send(mk_error(err));
+		} else {
+			var health = {"health": st};
+			res.send(health);
+		}	
 	});
 }
 
@@ -177,12 +188,18 @@ function get_zpool_status(req, res, next) {
 function get_prov_mem(req, res, next) {
 	system.getProvisionableMemory(function(err, mem) {
 		if (err) {
-			res.send(err);
+			res.send(mk_error(err));
 		} else {
 			var memory = {"memory": mem};
 			res.send(memory);
 		}	
 	});
+}
+
+// wrap a error for json
+function mk_error(err) {
+	var msg = {"error":err};
+	return msg;
 }
 
 // Start server
