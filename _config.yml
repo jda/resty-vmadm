@@ -4,4 +4,4 @@ permalink: ':title'
 pygments: true
 safe: true
 title: 'resty-vmadm'
-baseurl: /resty-vmadm/api
+baseurl: "/resty-vmadm"
