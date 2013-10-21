@@ -5,44 +5,9 @@ REST API for managing SmartOS VMs
 
 resty-vmadm (rva) is a very thin web service wrapper around vmadm.
 
-## API
+API Reference: http://jda.github.io/resty-vmadm/api.html
 
-### GET /zones
-Returns array of zones by UUID
-
-### POST /zones
-Provide a machine json description in post body as content-type application/json to create a new zone
-
-### GET /zones/zone-uuid-here
-Returns zone configuration
-
-### DELETE /zones/zone-uuid-here
-Delete the zone
-
-### PUT /zones/zone-uuid-here/start
-Start the zone
-
-### PUT /zones/zone-uuid-here/stop
-Stop the zone
-
-### GET /zones/zone-uuid-here/info
-*KVM Zones only*
-
-Returns KVM status & hardware details
-
-### GET /zones/zone-uuid-here/info/info-node-here
-*KVM Zones only*
-
-Returns a subset of KVM info status. 
-E.g. /zones/zone-uuid/info/vnc returns the VNC connection information for a given KVM zone.
-
-## Installation
-*On a SmartOS global zone*
-
-1. Copy the resty-vmadm source directory to /opt/resty-vmadm
-2. ln -s /opt/resty-vmadm/resty-vmadm.xml /opt/custom/smf/resty-vmadm.xml
-3. Edit the config to set port numbers, username, password, etc: /opt/resty-vmadm/etc/resty-vmadm.json
-4. reboot the system to make sure everything comes up cleanly
+See project web site for more information: http://jda.github.io/resty-vmadm/
 
 ## Security note
 resty-vmadm is pretty dangerous and should only be run in a trusted environment. 
