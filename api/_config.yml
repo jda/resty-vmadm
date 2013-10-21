@@ -1,0 +1,6 @@
+---
+exclude: ['README.markdown']
+permalink: ':title'
+pygments: true
+safe: true
+title: 'resty-vmadm'
