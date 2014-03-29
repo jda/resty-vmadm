@@ -144,6 +144,24 @@ function new_vm(req, res, next) {
 	);
 }
 
+// update existing zone
+function update_vm(req, res, next) {
+	// afaik req.params has url part and body in object so remove uuid from req 
+	// so it doesn't get passed to VM.update	
+	var uuid = req.params.uuid;
+	delete req.params.uuid;
+	
+	VM.update(uuid, req.params,
+		function(err, vmobjs) {
+			if (err) {
+				res.send(mk_error(err));
+			} else {
+				res.send(vmobjs);
+			}
+		}
+	);
+}
+
 // Given a array of fields and a array of arrays of values
 // convert to a array of objects values keyed by name
 function flatten_fields(header, data) {
@@ -236,6 +254,7 @@ server.get('/zones/:uuid/info', info);
 server.get('/zones/:uuid/info/:subset', info);
 server.put('/zones/:uuid/start', start_vm);
 server.put('/zones/:uuid/stop', stop_vm);
+server.post('/zones/:uuid', update_vm);
 server.del('/zones/:uuid', delete_vm);
 server.post('/zones', new_vm);
 
