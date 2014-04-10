@@ -13,6 +13,7 @@ var panic = require('/usr/node/node_modules/panic');
 var sprintf = require('/usr/node/node_modules/sprintf').sprintf;
 var tty = require('tty');
 var util = require('util');
+var exec  = require('child_process').exec;
 
 // Bundled packages
 var restify = require('/opt/resty-vmadm/node_modules/restify');
@@ -41,16 +42,18 @@ if ("port" in cfg) {} else {
 
 // list of zones (just uuid)
 function lookup(req, res, next) {
-  VM.lookup({}, 
-    function(err, vmobjs) {
-      if (err) {
-        res.send(mk_error(err));
-      } else {
-        var zones = {"zones": vmobjs};
-        res.send(zones);
-      }               
+  exec('vmadm list -p -o uuid', function(err, stdout, stderr) {
+    if (err) {
+      res.send(mk_error(err));
+    } else {
+      zones = stdout.split(/\n/);
+      zones.pop(); // remove last element because it's empty because newline
+
+      var out = {};
+      out.zones = zones;
+      res.send(out);
     }
-  );
+  });
 }
 
 // kvm info by uuid
