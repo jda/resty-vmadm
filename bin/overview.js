@@ -83,31 +83,85 @@ function padString(str, len) {
 	return newstr;
 }
 
-function getZoneInfo(conn, zones) {
+function brand(b) {
+	var res = "";
+	if (b === "joyent") {
+		res = "OS";
+	} else if (b === "kvm") {
+		res = "KVM";
+	}
+	return res;
+}
+
+function printZoneInfo(host, cfg) {
+	var out = "";
+
+	var zi = {};
+	zi.host = host;
+	zi.uuid = cfg.zonename;
+	zi.type = brand(cfg.brand);
+
+	var mem = 0;
+	if (zi.type === "KVM") {
+		mem = cfg.ram;
+	} else {
+		mem = cfg.max_physical_memory;
+	}
+	zi.ram = '' + mem;
+	zi.state = cfg.state;
+	zi.alias = cfg.alias;
+
+	// format output
+	for (i in fields) {
+		ename = fields[i];
+		field = LIST_FIELDS[ename];
+		elem = zi[ename];
+
+		if (elem === undefined) {
+			elem = "";
+		}
+		out += padString(elem, field.width) + ' ';
+	}
+
+	console.log(out);
+}
+
+function getZoneInfo(conn, zone) {
+	var respbuffer = "";
+	conn.path = '/zones/' + zone;
+	http.request(conn, function(res) {
+		if (res.statusCode !== 200) {
+			console.log("Error communicating with " + options['host'] + ": Code " + res.statusCode);
+			res.on('data', function (chunk) {});
+			return;
+		}
+
+		res.setEncoding('utf8');
+		
+		var data = "";
+		res.on('data', function (chunk) {
+			data += chunk;
+		});
+
+		res.on('end', function () {
+			var out = JSON.parse(data);
+			printZoneInfo(conn['host'], out);
+		});
+	}).end();
+}
+
+function handleZones(conn, zones) {
 	for (i in zones) {
 		var zi = {};
 		zi.uuid = zones[i];
 		zi.host = conn['host'];
 
-		var out = "";
-		// format output
-		for (i in fields) {
-			ename = fields[i];
-			field = LIST_FIELDS[ename];
-			elem = zi[ename];
-
-			if (elem === undefined) {
-				elem = "";
-			}
-
-			out += padString(elem, field.width) + ' ';
-		}
-
-		console.log(out);
+		var myconn = conn;
+		getZoneInfo(myconn, zi.uuid);
 	}
 }
 
-function getZones(host) {
+function getHostZones(host) {
 	var addrparts = h['name'].split(':');
 
 	var username = config['default_username'];
@@ -134,11 +188,17 @@ function getZones(host) {
 			res.on('data', function (chunk) {});
 			return;
 		}
-		// why options overwritten by the time we get here?
+
 		res.setEncoding('utf8');
+		
+		var data = "";
 		res.on('data', function (chunk) {
-			var res = JSON.parse(chunk);
-			getZoneInfo(options, res['zones']);
+			data += chunk;
+		});
+
+		res.on('end', function () {
+			var out = JSON.parse(data);
+			handleZones(options, out['zones']);
 		});
 	}).end();
 }
@@ -169,6 +229,6 @@ header(fields);
 // async fetch urls & print
 for (i in config['hosts']) {
 	var h = config['hosts'][i];
-	getZones(h);
+	getHostZones(h);
 }
 
