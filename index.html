@@ -60,6 +60,11 @@ Make higher-level tools possible. Don't be the high-level control panel.</li>
 <li>reboot the system to make sure everything comes up cleanly</li>
 </ol>
 
+<h3><a name="overview" class="anchor" href="#setup"><span class="octicon octicon-link"></span></a>Overview Tool</h3>
+<p>
+resty-vmadm includes a tool (overview.js in bin) that mimics the default <blockquote>vmadm list</blockquote> output except it lists VMs on multiple hosts. To install, copy etc/resty-vmadm-client.json to ~/.resty-vmadm-client.json after entering your username, password, and SmartOS/resty-vmadm hosts. Put overview.js somewhere convenient and enjoy.
+</p>
+
 <h3><a name="security" class="anchor" href="#security"><span class="octicon octicon-link"></span></a>Security note</h3>
 <p>resty-vmadm is pretty dangerous and should only be run in a trusted environment. 
 Your global zone is on a restricted management network, right? Seriously, don't expose this to anything
