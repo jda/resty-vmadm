@@ -1,0 +1,15 @@
+{
+  "default_username": "apiuserblah",
+  "default_password": "What's the password?",
+  "hosts": [
+    {
+      "name": "192.168.0.5:8095"
+    },
+    {
+      "name": "192.168.0.6:8095"
+    },
+    {
+      "name": "192.168.0.7:8095"
+    }
+  ]
+}
