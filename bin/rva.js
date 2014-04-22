@@ -1,4 +1,5 @@
 #!/usr/node/bin/node --abort_on_uncaught_exception
+// Copyright (c) 2014 Jonathan Auer
 
 // System-provided packages
 var async = require('/usr/node/node_modules/async');
