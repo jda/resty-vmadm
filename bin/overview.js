@@ -12,11 +12,9 @@ function resolvePath (string) {
   return path.resolve(string)
 }
 
-var fields = ['host', 'uuid', 'type', 'ram', 'state', 'alias'];
-
 // SmartOS/CDDL: https://github.com/joyent/smartos-live/blob/master/src/vm/sbin/vmadm.js
 var LIST_FIELDS = {
-    alias: {header: 'ALIAS', width: 10},
+    alias: {header: 'ALIAS', width: 15},
     autoboot: {header: 'AUTOBOOT', width: 8},
     billing_id: {header: 'BILLING_ID', width: 36},
     brand: {header: 'BRAND', width: 14},
@@ -53,7 +51,9 @@ var LIST_FIELDS = {
     zonename: {header: 'ZONENAME', width: 12},
     zonepath: {header: 'ZONEPATH', width: 40},
     zoneid: {header: 'ZONEID', width: 6},
-    host: {header: 'HOST', width: 15}
+    host: {header: 'HOST', width: 15},
+    avail_storage: {header: 'AVAIL STORAGE', width: 14},
+    avail_ram: {header: 'AVAIL RAM', width: 14}
 };
 
 function header(fields) {
@@ -203,14 +203,134 @@ function getHostZones(host) {
 	}).end();
 }
 
+// this is annoying and jumps from mem to storage and then output. Wat?
+function chainResourcesGetHostMemory(h) {
+	var addrparts = h['name'].split(':');
+
+	var username = config['default_username'];
+	if (h['username'] !== undefined) {
+		username = h['username'];
+	}
+
+	var password = config['default_password'];
+	if (h['password'] !== undefined) {
+		password = h['password'];
+	}
+
+	var options = {
+		host: addrparts[0],
+		port: addrparts[1],
+		path: '/memory',
+		method: 'GET',
+		auth: username + ':' + password
+	}
+
+	http.request(options, function(res) {
+		if (res.statusCode !== 200) {
+			console.log("Error communicating with " + options['host'] + ": Code " + res.statusCode);
+			res.on('data', function (chunk) {});
+			return;
+		}
+
+		res.setEncoding('utf8');
+		
+		var data = "";
+		res.on('data', function (chunk) {
+			data += chunk;
+		});
+
+		res.on('end', function () {
+			var out = JSON.parse(data);
+			var mem = out['memory'];
+			chainResourcesGetHostStorage(h, mem);
+		});
+	}).end();
+}
+
+function chainResourcesGetHostStorage(h, memory) {
+	var addrparts = h['name'].split(':');
+
+	var username = config['default_username'];
+	if (h['username'] !== undefined) {
+		username = h['username'];
+	}
+
+	var password = config['default_password'];
+	if (h['password'] !== undefined) {
+		password = h['password'];
+	}
+
+	var options = {
+		host: addrparts[0],
+		port: addrparts[1],
+		path: '/storage',
+		method: 'GET',
+		auth: username + ':' + password
+	}
+
+	http.request(options, function(res) {
+		if (res.statusCode !== 200) {
+			console.log("Error communicating with " + options['host'] + ": Code " + res.statusCode);
+			res.on('data', function (chunk) {});
+			return;
+		}
+
+		res.setEncoding('utf8');
+		
+		var data = "";
+		res.on('data', function (chunk) {
+			data += chunk;
+		});
+
+		res.on('end', function () {
+			var out = JSON.parse(data);
+			var storage = out['zpools'];
+			var zonepool = {};
+			for (idx in storage) {
+				var pool = storage[idx];
+				if (pool.name == 'zones') {
+					zonepool = pool;
+					break;
+				}
+			}
+			showHostResources(addrparts[0], memory, zonepool);
+		});
+	}).end();
+}
+
+function showHostResources(host, memory, storage) {
+	var out = "";
+
+	var zi = {};
+	zi.host = host;
+	zi.avail_ram = (memory / 1000) + 'G';
+	zi.avail_storage = storage.free;
+
+	// format output
+	for (i in fields) {
+		ename = fields[i];
+		field = LIST_FIELDS[ename];
+		elem = zi[ename];
+
+		if (elem === undefined) {
+			elem = "";
+		}
+		out += padString(elem, field.width) + ' ';
+	}
+
+	console.log(out);
+}
+
 Troll = require('troll-opt').Troll
-opts = (new Troll()).options(function(troll) {
+troll = new Troll()
+opts = (troll.options(function(troll) {
   troll.banner('Get status of SmartOS hypervisor(s) via resty-vmadm');
   troll.opt('config',   'config file', { short: 'c', default: "~/.resty-vmadm-client.json" });
   troll.opt('host',     'resty-vmadm host', { short: 'H', type: 'string' });
   troll.opt('user',	    'username', {short: 'u', type: 'string'});
   troll.opt('password', 'password', {short: 'p', type: 'string'});
-});
+  troll.opt('mode',     'run mode', {short: 'm', default: "list"});
+}));
 
 var fileContents = fs.readFileSync(resolvePath(opts['config']),'utf8'); 
 var config = JSON.parse(fileContents); 
@@ -224,11 +344,25 @@ if (opts['password'] !== undefined) {
 	config['default_password'] = opts['password'];
 }
 
-header(fields);
-
-// async fetch urls & print
-for (i in config['hosts']) {
-	var h = config['hosts'][i];
-	getHostZones(h);
+switch(opts['mode']) {
+	case 'list':
+		var fields = ['host', 'uuid', 'type', 'ram', 'state', 'alias'];
+		header(fields);
+		// async fetch urls & print
+		for (i in config['hosts']) {
+			var h = config['hosts'][i];
+			getHostZones(h);
+		}
+		break;
+	case 'free':
+		var fields = ['host', 'avail_ram', 'avail_storage'];
+		header(fields);
+		for (i in config['hosts']) {
+			var h = config['hosts'][i];
+			chainResourcesGetHostMemory(h);
+		}
+		break;
 }
+
+
 
