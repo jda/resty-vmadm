@@ -9,7 +9,6 @@ var system = require('/usr/node/node_modules/system');
 var zfs = require('/usr/node/node_modules/zfs');
 var nopt = require('/usr/vm/node_modules/nopt');
 var onlyif = require('/usr/node/node_modules/onlyif');
-var panic = require('/usr/node/node_modules/panic');
 var sprintf = require('/usr/node/node_modules/sprintf').sprintf;
 var tty = require('tty');
 var util = require('util');
