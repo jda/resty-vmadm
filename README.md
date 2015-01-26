@@ -22,7 +22,7 @@ Restify and its dependencies are bundled in node_modules for ease of deployment.
 Their respective license statements can be found in the usual place inside node_modules.
 
 ## License
-> Copyright (c) 2013 Jonathan Auer
+> Copyright (c) 2014 Jonathan Auer
 > 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to
